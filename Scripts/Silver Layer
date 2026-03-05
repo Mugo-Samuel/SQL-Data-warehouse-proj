@@ -71,7 +71,7 @@ dwh_create_date DATETIME2 DEFAULT GETDATE()
 );
 
 USE DataWarehouse;
-GO
+TRUNCATE TABLE silver.crm_cust_info;
 INSERT INTO silver.crm_cust_info(
 cst_id,
 cst_key,
@@ -105,7 +105,7 @@ SELECT
  where cst_id IS NOT NULL
  )t WHERE flag_last =1
 
-
+TRUNCATE TABLE silver.crm_prd_info;
 INSERT INTO silver.crm_prd_info(
 prd_id,
 cat_id,
@@ -135,24 +135,9 @@ CAST(prd_start_dt AS DATE) AS prd_start_dt,
 CAST(LEAD(prd_start_dt) OVER (PARTITION BY prd_key ORDER BY prd_start_dt) -1 AS DATE) AS prd_end_dt
 FROM bronze.crm_prd_info
 
-##Modify table for new modifications made
-IF OBJECT_ID ('silver.crm_prd_info' , 'U') IS NOT NULL
-   DROP TABLE silver.crm_prd_info;
-
-CREATE TABLE silver.crm_prd_info(
-prd_id INT,
-cat_id NVARCHAR(50),
-prd_key NVARCHAR(50),
-prd_nm  NVARCHAR(50),
-prd_cost INT,
-prd_line NVARCHAR(50),
-prd_start_dt DATE,
-prd_end_dt   DATE,
-dwh_create_date DATETIME2 DEFAULT GETDATE()
-);
-
 
 USE DataWarehouse
+TRUNCATE TABLE silver.crm_sales_details;
 INSERT INTO silver.crm_sales_details(
 sls_ord_num,
 sls_prd_key,
@@ -198,6 +183,7 @@ FROM bronze.crm_sales_details
 
 ##ERP
 USE DataWarehouse
+TRUNCATE TABLE silver.erp_cust_az12;
 INSERT INTO silver.erp_cust_az12(cid, bdate, gen)
 SELECT
 CASE WHEN cid LIKE 'NAS%' THEN SUBSTRING (cid,4, LEN(cid))
@@ -215,6 +201,7 @@ END AS gen
 FROM bronze.erp_cust_az12
 
 USE DataWarehouse
+TRUNCATE TABLE silver.erp_loc_a101;
 INSERT INTO silver.erp_loc_a101
 (cid, cntry)
 SELECT
@@ -226,7 +213,7 @@ CASE WHEN TRIM(cntry) = 'DE' THEN 'Germany'
 END AS cntry
 FROM bronze.erp_loc_a101;
 
-
+TRUNCATE TABLE silver.erp_px_cat_g1v2;
 INSERT INTO silver.erp_px_cat_g1v2(id, cat, subcat, maintenance)
 SELECT
 id,
